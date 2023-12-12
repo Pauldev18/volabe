@@ -6,11 +6,14 @@ import com.example.volunteer_campaign_management.entities.CampaignEntity;
 import com.example.volunteer_campaign_management.services.CampaignService;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
@@ -20,20 +23,31 @@ import java.util.Optional;
 public class CampaignController {
 
     private final CampaignService campaignService;
-
-    @PostMapping("/createCampaign")
-    public CampaignEntity createNewCampaign(@RequestParam("name") String name,
-                                            @RequestParam("start_date")
-                                            @DateTimeFormat(pattern = "dd-MM-yyyy") Timestamp start_date,
-                                            @RequestParam("end_date")
-                                                @DateTimeFormat(pattern = "dd-MM-yyyy") Timestamp end_date,
-                                            @RequestParam("desc") String desc,
-                                            @RequestParam("title") String title,
-                                            @RequestParam("location") String location,
-                                            @RequestParam("image") MultipartFile image,
-                                            @RequestParam("currentStatus") int currentStatus) {
-        return campaignService.createNewCampaign(name, start_date, end_date, desc, title, location, image, currentStatus);
+    public static Timestamp convertStringToTimestamp(String dateString) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        Date date = sdf.parse(dateString);
+        return new Timestamp(date.getTime());
     }
+    @PostMapping("/createCampaign")
+    public ResponseEntity<Object> createNewCampaign(@RequestParam("name") String name,
+                                                    @RequestParam("start_date") String start_date,
+                                                    @RequestParam("end_date") String end_date,
+                                                    @RequestParam("desc") String desc,
+                                                    @RequestParam("title") String title,
+                                                    @RequestParam("location") String location,
+                                                    @RequestParam("image") MultipartFile image,
+                                                    @RequestParam("currentStatus") int currentStatus) {
+        try {
+            Timestamp startDate = convertStringToTimestamp(start_date);
+            Timestamp endDate = convertStringToTimestamp(end_date);
+
+            return campaignService.createNewCampaign(name, startDate, endDate, desc, title, location, image, currentStatus);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     @PutMapping("/updateCampaign/{id}")
     public CampaignDTO updateCampaign(@PathVariable(value = "id") int campaignId, @RequestBody CampaignDTO campaignDTO) {

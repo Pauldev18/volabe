@@ -9,6 +9,8 @@ import com.example.volunteer_campaign_management.repositories.CampaignRepository
 import com.example.volunteer_campaign_management.repositories.CurrentStatusRepository;
 import com.example.volunteer_campaign_management.services.CampaignService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +28,7 @@ public class CampaignServiceImpl implements CampaignService {
     private final MapperUtil mapperUtil;
 
     @Override
-    public CampaignEntity createNewCampaign(String name, Timestamp start_date, Timestamp end_date, String desc, String title, String location, MultipartFile image, int currentStatus) {
+    public ResponseEntity<Object> createNewCampaign(String name, Timestamp start_date, Timestamp end_date, String desc, String title, String location, MultipartFile image, int currentStatus) {
         try {
             CampaignEntity campaignEntity = new CampaignEntity();
             campaignEntity.setName(name);
@@ -39,7 +41,7 @@ public class CampaignServiceImpl implements CampaignService {
             campaignEntity.setStatusIssueEntity(currentStatusRepository.getOne(currentStatus));
             campaignEntity.setImage(cloudinaryService.uploadImage(image));
             campaignRepository.save(campaignEntity);
-            return campaignEntity;
+            return new ResponseEntity<>("Thêm thành công", HttpStatus.OK);
         } catch (Exception e) {
             e.getMessage();
         }
