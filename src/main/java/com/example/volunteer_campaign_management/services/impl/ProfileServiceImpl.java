@@ -10,17 +10,20 @@ import com.example.volunteer_campaign_management.repositories.AccountRepository;
 import com.example.volunteer_campaign_management.repositories.ProfileRepository;
 import com.example.volunteer_campaign_management.services.ProfileService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
     private final ProfileRepository profileRepository;
     private final AccountRepository accountRepository;
     private final MapperUtil mapperUtil;
+    private  final CloudinaryService cloudinaryServicel;
 
-    public ProfileServiceImpl(ProfileRepository profileRepository, AccountRepository accountRepository, MapperUtil mapperUtil) {
+    public ProfileServiceImpl(ProfileRepository profileRepository, AccountRepository accountRepository, MapperUtil mapperUtil, CloudinaryService cloudinaryServicel) {
         this.profileRepository = profileRepository;
         this.accountRepository = accountRepository;
         this.mapperUtil = mapperUtil;
+        this.cloudinaryServicel = cloudinaryServicel;
     }
 
     static AccountDTO getAccountDTO(AccountDTO accountDTO, AccountEntity accountEntity, AccountRepository accountRepository) {
@@ -43,7 +46,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfileEntity profileById(int accountId) {
         System.out.println(accountId);
-        ProfileEntity profileEntity = profileRepository.findById(accountId).get();
+        ProfileEntity profileEntity = profileRepository.findById(accountId);
         try {
             return profileEntity;
         } catch (Exception e) {
@@ -73,10 +76,30 @@ public class ProfileServiceImpl implements ProfileService {
         }
     }
     @Override
-    public AccountDTO updateProfile(int accountId, AccountDTO accountDTO) {
+    public ProfileDTO updateProfile(int accountId, String firstName, String lastName, String email, String phone, String address, MultipartFile avatar) {
         try{
             AccountEntity accountEntity = accountRepository.findById(accountId).get();
-            return getAccountDTO(accountDTO, accountEntity, accountRepository);
+            int profileID = accountEntity.getProfileEntity().getProfileId();
+            ProfileEntity updateProfile =profileRepository.findById(profileID);
+            updateProfile.setAvatar(cloudinaryServicel.uploadImage(avatar));
+            updateProfile.setFirstname(firstName);
+            updateProfile.setLastname(lastName);
+            updateProfile.setAddress(address);
+            accountEntity.setEmail(email);
+            accountEntity.setPhone(phone);
+            accountRepository.save(accountEntity);
+            profileRepository.save(updateProfile);
+
+            ProfileDTO response = new ProfileDTO();
+            response.setAddress(updateProfile.getAddress());
+            response.setAvatar(updateProfile.getAvatar());
+            response.setFirstname(updateProfile.getFirstname());
+            response.setLastname(updateProfile.getLastname());
+            response.setEmail(accountEntity.getEmail());
+            response.setPhone(accountEntity.getPhone());
+            response.setRol(accountEntity.getRoleEntity().getName());
+            response.setDepartment(accountEntity.getDepartmentEntity().getDescription());
+            return response;
         }catch (Exception e){
             e.getMessage();
         }

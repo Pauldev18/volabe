@@ -96,8 +96,14 @@ public class AccountController {
     }
 
     @PutMapping("/account/updateProfile/{id}")
-    public AccountDTO updateProfile(@PathVariable(value = "id") int accountId, @RequestBody AccountDTO accountDTO) {
-        return profileService.updateProfile(accountId,accountDTO);
+    public ProfileDTO updateProfile(@PathVariable(value = "id") int accountId,
+                                    @RequestParam("firstName") String firstName,
+                                    @RequestParam("lastName") String lastName,
+                                    @RequestParam("email") String email,
+                                    @RequestParam("phone") String phone,
+                                    @RequestParam("address") String address,
+                                    @RequestParam("avatar") MultipartFile avatar) {
+        return profileService.updateProfile(accountId, firstName, lastName, email, phone, address, avatar);
     }
 
     @GetMapping (value = {"account/searchAccount","account/searchAccount/{query}"})

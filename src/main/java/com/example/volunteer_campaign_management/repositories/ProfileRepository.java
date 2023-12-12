@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface ProfileRepository extends JpaRepository<ProfileEntity,Integer> {
  List<ProfileEntity> findByAddressContainingIgnoreCaseOrFirstnameContainingIgnoreCaseOrLastnameContainingIgnoreCase(Optional<String> query,Optional<String> query1,Optional<String> query2);
+ ProfileEntity findById(int profileID);
 }
