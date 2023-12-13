@@ -2,9 +2,11 @@ package com.example.volunteer_campaign_management.controller;
 
 import com.example.volunteer_campaign_management.dtos.RequestVolunteerDTO;
 import com.example.volunteer_campaign_management.dtos.StoryDTO;
+import com.example.volunteer_campaign_management.entities.StoryEntity;
 import com.example.volunteer_campaign_management.services.StoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -14,8 +16,14 @@ import java.util.Optional;
 public class StoryController {
     private final StoryService storyService;
     @PostMapping("/createStory")
-    public StoryDTO createNewStory(@RequestBody StoryDTO storyDTO) {
-        return storyService.createNewStory(storyDTO);
+    public StoryEntity createNewStory(
+            @RequestParam("name") String name,
+            @RequestParam("content") String content,
+            @RequestParam("title") String title,
+            @RequestParam("image")MultipartFile image,
+            @RequestParam("campaginID") int campaginID
+            ) {
+        return storyService.createNewStory(name, content, title, image, campaginID);
     }
 
     @PutMapping("/updateStory/{id}")

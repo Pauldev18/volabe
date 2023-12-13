@@ -10,8 +10,12 @@ import com.example.volunteer_campaign_management.repositories.StoryRepository;
 import com.example.volunteer_campaign_management.services.StoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,20 +25,21 @@ public class StoryServiceImpl implements StoryService {
     private final StoryRepository storyRepository;
     private final CampaignRepository campaignRepository;
     private final MapperUtil mapperUtil;
+    private final CloudinaryService cloudinaryService;
 
     @Override
-    public StoryDTO createNewStory(StoryDTO storyDTO) {
+    public StoryEntity createNewStory(String name, String content, String title, MultipartFile image, int campaginID) {
         try {
+            CampaignEntity select = campaignRepository.findByIdCom(campaginID);
             StoryEntity storyEntity = new StoryEntity();
-            storyEntity.setStoryId(storyDTO.getStoryId());
-            storyEntity.setName(storyDTO.getName());
-            storyEntity.setContent(storyDTO.getContent());
-            storyEntity.setTitle(storyDTO.getTitle());
-            storyEntity.setCreated_at(storyDTO.getCreated_at());
-            storyEntity.setImage(storyDTO.getImage());
-            storyEntity.setCampaignEntity(campaignRepository.getOne(storyDTO.getCampaignId()));
+            storyEntity.setName(name);
+            storyEntity.setContent(content);
+            storyEntity.setTitle(title);
+            storyEntity.setCreated_at(new Timestamp(System.currentTimeMillis()));
+            storyEntity.setImage(cloudinaryService.uploadImage(image));
+            storyEntity.setCampaignEntity(select);
             storyRepository.save(storyEntity);
-            return storyDTO;
+            return storyEntity;
         }catch (Exception e){
             e.getMessage();
         }
